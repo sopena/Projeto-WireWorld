@@ -3,6 +3,7 @@ import globals
 from tela import Tela
 from bloco import Bloco
 import pyxel_h_button_class as pb
+import os
 
 class App:
     def __init__(self, path):
@@ -34,18 +35,52 @@ class App:
     
     def load_file(self):
         f = list(open(self.path, "r"))
-        print(f)
-        print("-"*100)
         f = [s.rstrip() for s in f]                 # Remove qualquer espaço em branco no final da string
         lf = [_str.split(' ') for _str in f]        # Divide uma string em uma lista
-        print(lf)
         
         for x in range(len(lf)):
             for y in range(len(lf)):
                 self.t.grade[x][y] = lf[x][y] # Carrega os dados da matriz do arquivo na matriz da tela            
-        print("-"*100)
-        print(self.t.grade)
         self.population()
+    
+    def save(self):
+        if (self.path == ""):
+            new_file = self.create_file()
+        else:
+            save = True
+            while save:
+                print('\n')
+                print('GOSTARIA DE SALVAR OU CRIAR UM NOVO ARQUIVO?')
+                print('\n')
+                print("0 - SALVAR NO MESMO ARQUIVO\n1 - CRIAR NOVO ARQUIVO")
+                print("\n")
+                ask = input("DIGITE UMA OPÇÃO: ")
+                if ask == "0": 
+                    path = self.path
+                    new_file = open(path, "r+")
+                    new_file.seek(0)
+                    new_file.truncate(0)
+                    save = False
+                    print('\n')
+                    print('ARQUIVO SALVO COM SUCESSO!')
+                elif ask == "1":
+                    new_file = self.create_file()
+                    save = False
+                else:
+                    print('NÃO EXISTE ESSA OPÇÃO! TENTE NOVAMENTE')
+        matriz = []
+        for group in self.t.grade:
+            matriz.append((" ".join(group))+'\n')
+
+        for x in range(len(matriz)):
+            new_file.write(matriz[x])
+    
+    def create_file(self):
+        print("\n")
+        name_file = input("DIGITE O NOME DO ARQUIVO PARA SALVA-LO: ")
+        name_file = name_file+'.txt'
+        new_file = open(name_file, "x")
+        return new_file
 
     # Pega algum valor da matriz
     def get(self, x, y,):
@@ -106,7 +141,6 @@ class App:
             if self.t.grade[px.mouse_y//globals.lado][px.mouse_x//globals.lado] != "0":
                 self.popula -= 1
             self.t.grade[px.mouse_y//globals.lado][px.mouse_x//globals.lado] = "0"
-        print(self.popula)
 
     # Funções que detectam qual cor de bloco foi selecionada   
     def b1_press(self):
@@ -127,21 +161,6 @@ class App:
                 if self.t.grade[x][y] != "0":
                     t +=1
         self.popula +=t
-    
-    def save(self):
-        name_file = input("Digite o nome do arquivo para salva-lo: ")
-        name_file = name_file+'.txt'
-        new_file = open(name_file, "x")        
-        matriz = []
-
-        print("-"*100)
-        for group in self.t.grade:
-            matriz.append((" ".join(group))+'\n')
-        print(matriz)
-
-        for x in range(len(matriz)):
-            new_file.write(matriz[x])
-
         
     def update(self):
         px.mouse(True)
